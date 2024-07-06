@@ -69,7 +69,8 @@ class VisionTransformer(nn.Module):
         patches = self.patchifier(x)
         x = self.position_encoder(patches)
         z = self.encoder(x)
-        logits = self.classification_head(z)
+        cls_token = z[:,0,:]
+        logits = self.classification_head(cls_token)
 
         return logits
 
