@@ -291,7 +291,7 @@ class TransformerEncoder(nn.Module):
         z = self.multihead_attention(normalized_x) + x
 
         normalized_z = self.layer_norm(z)
-        z = self.mlp(normalized_z) + normalized_z
+        z = self.mlp(normalized_z) + z
 
         return z 
 
