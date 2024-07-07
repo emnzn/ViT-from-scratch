@@ -1,0 +1,9 @@
+seed: 42
+patience: 10
+img_size: 32
+variant: base
+batch_size: 20
+num_classes: 10
+weight_decay: 1.0e-4
+learning_rate: 1.0e-4
+dropout_probability: 0.0

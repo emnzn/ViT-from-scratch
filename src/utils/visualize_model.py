@@ -1,9 +1,10 @@
 import os
+from get_model import get_model
 from torchview import draw_graph
+from ViT import VisionTransformer
 from graphviz.graphs import Digraph
-from model import VisionTransformer 
 
-def generate_graph(model: VisionTransformer, destination: str) -> Digraph:
+def generate_graph(model: VisionTransformer, variant: str, destination: str) -> Digraph:
     """
     Creates a graph to visualize the architecture of the Vision Transformer.
 
@@ -12,12 +13,15 @@ def generate_graph(model: VisionTransformer, destination: str) -> Digraph:
     model: VisionTransformer
         The model to be visualized.
 
+    variant: str
+        The ViT variant
+
     destination: str
         The path where the generated graph will be saved.
 
     Returns
     -------
-    graoh: Digraph
+    graph: Digraph
         A digraph object that visualizes the model.
     """
 
@@ -26,7 +30,7 @@ def generate_graph(model: VisionTransformer, destination: str) -> Digraph:
         graph_name="vision-transformer",
         expand_nested=True,
         save_graph=True, directory=destination,
-        filename="vision-transformer-architecture"
+        filename=f"ViT-{variant}-architecture"
     )
 
     graph = model_graph.visual_graph
@@ -35,16 +39,13 @@ def generate_graph(model: VisionTransformer, destination: str) -> Digraph:
 
 if __name__ == "__main__":
     destination = os.path.join("..", "..", "assets", "architecture")
-    patch_size = 16
-    num_channels = 3
-    embed_dim = 768
-    sequence_len = ((512 // patch_size) ** 2) + 1
-    num_heads = 12
-    hidden_size = 3072
-    num_layers = 12
-    model = VisionTransformer(patch_size, num_channels, embed_dim, sequence_len, num_heads, num_layers, hidden_size, 0.0, 10)
-
+    
     if not os.path.isdir(destination):
         os.makedirs(destination)
+    
+    for variant in ["base", "large", "huge"]:
+        model = get_model(
+            512, 16, variant=variant, dropout_probability=0.0, num_classes=10
+        )
 
-    generate_graph(model, destination)
+        generate_graph(model, variant, destination)
