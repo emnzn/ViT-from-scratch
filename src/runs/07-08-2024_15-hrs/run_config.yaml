@@ -1,0 +1,12 @@
+batch_size: 20
+dropout_probability: 0.1
+epochs: 200
+img_size: 32
+learnable_pe: true
+learning_rate: 0.0001
+num_classes: 10
+patch_size: 16
+patience: 10
+seed: 42
+variant: base
+weight_decay: 0.001

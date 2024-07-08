@@ -38,6 +38,11 @@ class VisionTransformer(nn.Module):
     num_classes: int
         The number of classes to be predicted.
 
+    learnable_pe: bool
+        Whether to initialize a learnable position embedding.
+        If false returns static Sinusoidal position embedding from `Attention Is All You Need`. 
+        (https://arxiv.org/abs/1706.03762)
+
     Returns
     -------
     logits: torch.Tensor
@@ -48,13 +53,13 @@ class VisionTransformer(nn.Module):
     def __init__(
         self, patch_size: int, num_channels: int, hidden_size: int, 
         sequence_len: int, num_heads: int, num_layers: int, mlp_size: int,
-        dropout_probability: int, num_classes: int
+        dropout_probability: int, num_classes: int, learnable_pe: bool
         ) -> torch.Tensor:
 
         super(VisionTransformer, self).__init__()
 
         self.patchifier = Patchifier(patch_size, num_channels, hidden_size)
-        self.position_encoder = PositionEncoder(sequence_len, hidden_size, dropout_probability)
+        self.position_encoder = PositionEncoder(sequence_len, hidden_size, dropout_probability, learnable_pe)
         
         self.encoder = Encoder(*[
             TransformerEncoder(
@@ -136,23 +141,34 @@ class PositionEncoder(nn.Module):
         The probability of dropout for the combined representation from the initial
         linear projection and positional encoding.
 
+    learnable: bool
+        Whether to initialize a learnable position embedding.
+        If false returns static Sinusoidal position embedding from `Attention Is All You Need`. 
+        (https://arxiv.org/abs/1706.03762)
+
     Returns
     -------
     combined_embedding: torch.Tensor
         The input embedding combined with the positional embedding.
     """
-    def __init__(self, sequence_len: int, hidden_size: int, dropout_probability: float) -> torch.Tensor:
+
+    def __init__(
+            self, sequence_len: int, hidden_size: int, 
+            dropout_probability: float, learnable: bool
+            ) -> torch.Tensor:
+        
         super(PositionEncoder, self).__init__()
 
         assert hidden_size % 2 == 0, "Ensure embedding length is even for convenience and efficiency"
 
         self.sequence_len = sequence_len
         self.hidden_size = hidden_size
-        self.position_encoding = self.get_position_encoding()
+        self.learnable = learnable
+        self.position_encoding = nn.Parameter(torch.randn(sequence_len, hidden_size)) if learnable else self.sinusoidal_pe()
 
         self.dropout = nn.Dropout(p=dropout_probability)
 
-    def get_position_encoding(self):
+    def sinusoidal_pe(self):
         max_iter = self.hidden_size // 2
         pos = torch.arange(self.sequence_len, dtype=torch.float).unsqueeze(1)
 
@@ -171,7 +187,12 @@ class PositionEncoder(nn.Module):
         return position_encoding
 
     def forward(self, x):
+        device = x.device
         position_encoding = self.position_encoding.unsqueeze(0)
+        
+        if not self.learnable:
+            position_encoding = position_encoding.to(device)
+
         combined_embedding = x + position_encoding
         combined_embedding = self.dropout(combined_embedding)
 

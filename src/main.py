@@ -4,13 +4,13 @@ from tqdm import tqdm
 from typing import Tuple
 from datetime import datetime
 import torch.nn.functional as F
-from sklearn.metrics import f1_score
 from torchvision.datasets import CIFAR10
+from sklearn.metrics import accuracy_score
 from torchvision.transforms import transforms
 from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader, random_split
 from utils import VisionTransformer, get_args, save_args, \
-    get_model, get_checkpoint
+    get_model, get_checkpoint, set_seed
 
 def train(
         dataloader: DataLoader, 
@@ -44,13 +44,13 @@ def train(
     epoch_loss: float
         The loss for the entire epoch.
 
-    epoch_f1: float
-        The f1 score for the epoch.
+    epoch_accuracy: float
+        The accuracy for the epoch.
     """
 
     metrics = {
         "running_loss": 0,
-        "running_f1": 0
+        "running_accuracy": 0
     }
 
     model.train()
@@ -59,23 +59,23 @@ def train(
         target = target.to(device)
 
         logits = model(img)
-        confidence = F.softmax(img, dim=1)
+        confidence = F.softmax(logits, dim=1)
         pred = torch.argmax(confidence, dim=1)
 
         loss = criterion(logits, target)
-        f1 = f1_score(target, pred, average="macro")
+        accuracy = accuracy_score(target.cpu(), pred.cpu())
 
         metrics["running_loss"] += loss.detach().cpu().item()
-        metrics["running_f1"] += f1
+        metrics["running_accuracy"] += accuracy
 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
     epoch_loss = metrics["running_loss"] / len(dataloader)
-    epoch_f1 = metrics["running_f1"] / len(dataloader)
+    epoch_accuracy = metrics["running_accuracy"] / len(dataloader)
 
-    return epoch_loss, epoch_f1
+    return epoch_loss, epoch_accuracy
 
 def validate(dataloader, criterion, model, device):
     """
@@ -84,7 +84,7 @@ def validate(dataloader, criterion, model, device):
 
     metrics = {
         "running_loss": 0,
-        "running_f1": 0
+        "running_accuracy": 0
     }
 
     model.eval()
@@ -96,40 +96,42 @@ def validate(dataloader, criterion, model, device):
         confidence = F.softmax(logits, dim=1)
         pred = torch.argmax(confidence, dim=1)
 
-        loss = criterion(pred, target)
-        f1 = f1_score(target, pred, average="macro")
+        loss = criterion(logits, target)
+        accuracy = accuracy_score(target.cpu(), pred.cpu())
 
         metrics["running_loss"] += loss.detach().cpu().item()
-        metrics["running_f1"] += f1
+        metrics["running_accuracy"] += accuracy
 
     epoch_loss = metrics["running_loss"] / len(dataloader)
-    epoch_f1 = metrics["running_f1"] / len(dataloader)
+    epoch_accuracy = metrics["running_accuracy"] / len(dataloader)
 
-    return epoch_loss, epoch_f1
+    return epoch_loss, epoch_accuracy
 
 def main():
     data_dir = os.path.join("..", "data")
     arg_path = os.path.join("config", "train_config.yaml")
     args = get_args(arg_path)
-    id = datetime.now().strftime("%m-%d-%Y-%H:%M") 
+    id = datetime.now().strftime("%m-%d-%Y_%H-hrs") 
 
     model_dir = os.path.join("..", "assets", "models", id)
     log_dir = os.path.join("runs", id)
     writer = SummaryWriter(log_dir)
     save_args(log_dir, args)
+    set_seed(args["seed"])
 
     if not os.path.isdir(model_dir):
         os.makedirs(model_dir)
 
-    transform = transforms.compose([
+    transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
     dataset = CIFAR10(root=data_dir, train=True, download=True, transform=transform)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    train_size = len(dataset) * 0.8
-    val_size = len(dataset) - train_size
+    train_size = int(len(dataset) * 0.8)
+    val_size = int(len(dataset) - train_size)
 
     train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
 
@@ -137,58 +139,58 @@ def main():
     val_loader = DataLoader(val_dataset, batch_size=args["batch_size"], shuffle=False)
 
     model = get_model(
-        args["img_size"], patch_size=4, variant=args["variant"], 
+        args["img_size"], patch_size=args["patch_size"], variant=args["variant"], 
         dropout_probability=args["dropout_probability"],
-        num_classes=args["num_classes"]
-    )
+        num_classes=args["num_classes"], learnable_pe=args["learnable_pe"]
+    ).to(device)
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=args["learning_rate"], weight_decay=args["weight_decay"])
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", patience=args["patience"])
 
-    running_val_loss, running_val_f1 = [], []
+    running_val_loss, running_val_accuracy = [], []
 
     for epoch in range(1, args["epochs"] + 1):
+        writer.add_scalar("Learning Rate", scheduler.optimizer.param_groups[0]["lr"], epoch)
         print(f"Epoch [{epoch}/{args['epochs']}]")
 
-        train_loss, train_f1 = train(train_loader, criterion, optimizer, model, device)
+        train_loss, train_accuracy = train(train_loader, criterion, optimizer, model, device)
 
-        print("\nTrain Statistics:")
-        print(f"Loss: {train_loss:.4f} | F1: {train_f1:.4f}")
+        print("Train Statistics:")
+        print(f"Loss: {train_loss:.4f} | Accuracy: {train_accuracy:.4f}\n")
 
         writer.add_scalar("Train/Loss", train_loss, epoch)
-        writer.add_scalar("Train/F1", train_f1, epoch)
+        writer.add_scalar("Train/Accuracy", train_accuracy, epoch)
 
-        val_loss, val_f1 = validate(val_loader, criterion, model, device)
+        val_loss, val_accuracy = validate(val_loader, criterion, model, device)
 
-        print("\nValidation Statistics:")
-        print(f"Loss: {val_loss:.4f} | F1: {val_f1:.4f}")
+        print("Validation Statistics:")
+        print(f"Loss: {val_loss:.4f} | Accuracy: {val_accuracy:.4f}\n")
 
-        writer.add_scalar("Validation/Loss", val_loss)
-        writer.add_scalar("Validation/F1", val_f1, epoch)
+        writer.add_scalar("Validation/Loss", val_loss, epoch)
+        writer.add_scalar("Validation/Accuracy", val_accuracy, epoch)
 
-        if len(running_val_loss) > 0 and val_loss < running_val_loss:
-            torch.save(model.state_dict(), os.path.join(model_dir, f"vit-{args["variant"]}-lowest-loss.pth"))
+        if len(running_val_loss) > 0 and val_loss < min(running_val_loss):
+            torch.save(model.state_dict(), os.path.join(model_dir, f"vit-{args['variant']}-lowest-loss.pth"))
             print("New minimum loss — model saved.")
 
-        if len(running_val_f1) > 0 and val_f1 > max(running_val_f1):
-            torch.save(model.state_dict(), os.path.join(model_dir, f"vit-{args["variant"]}-highest-f1.pth"))
-            print("New maximum F1 - model saved.")
+        if len(running_val_accuracy) > 0 and val_accuracy > max(running_val_accuracy):
+            torch.save(model.state_dict(), os.path.join(model_dir, f"vit-{args['variant']}-{args["patch_size"]}-highest-accuracy.pth"))
+            print("New maximum Accuracy - model saved.")
 
         if epoch % 5 == 0:
             checkpoint = get_checkpoint(epoch, model, optimizer, scheduler)
-            torch.save(checkpoint, os.path.join(model_dir, f"vit-{args["variant"]}-latest-checkpoint.pth"))
+            torch.save(checkpoint, os.path.join(model_dir, f"vit-{args['variant']}-latest-checkpoint.pth"))
             print("Checkpoint saved.")
 
         running_val_loss.append(val_loss)
-        running_val_f1.append(val_f1)
+        running_val_accuracy.append(val_accuracy)
 
         scheduler.step(val_loss)
 
-        print("___________________________________________________________________\n")
+        print("-------------------------------------------------------------------\n")
 
-    torch.save(model.state_dict(), os.path.join(model_dir, f"vit-{args["variant"]}-latest-model.pth"))
+    torch.save(model.state_dict(), os.path.join(model_dir, f"vit-{args['variant']}-latest-model.pth"))
 
 if __name__ == "__main__":
     main()
