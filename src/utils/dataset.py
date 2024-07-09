@@ -27,7 +27,6 @@ def get_dataset(data_dir: str) -> Tuple[CIFAR10]:
         transforms.RandomGrayscale(p=0.2),
         transforms.RandomHorizontalFlip(p=0.2),
         transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5),
-        transforms.RandomErasing(p=0.5, scale=(0.02, 0.33), ratio=(0.3, 3.3)),
         transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5.0)),
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
