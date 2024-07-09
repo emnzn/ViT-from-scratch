@@ -1,5 +1,6 @@
 .*
+*.sh
+*.pbs
 *.pth
 data/*
-*.pbs
 *__pycache__*
