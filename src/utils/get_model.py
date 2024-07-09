@@ -1,3 +1,4 @@
+import torch
 from .ViT import VisionTransformer
 
 def get_model(
@@ -74,5 +75,8 @@ def get_model(
                 mlp_size=mlp_size, dropout_probability=dropout_probability, 
                 num_classes=num_classes, learnable_pe=learnable_pe
             )
+    
+    if torch.cuda.device_count() > 1:
+        model = torch.nn.DataParallel(model)
     
     return model
