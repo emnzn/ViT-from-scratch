@@ -62,7 +62,7 @@ class VisionTransformer(nn.Module):
         self.position_encoder = PositionEncoder(sequence_len, hidden_size, dropout_probability, learnable_pe)
         
         self.encoder = Encoder(*[
-            TransformerEncoder(
+            TransformerBlock(
                 num_heads, sequence_len, hidden_size, mlp_size, dropout_probability
                 ) for _ in range(num_layers)
                 ])
@@ -212,6 +212,9 @@ class MultiHeadAttention(nn.Module):
 
     hidden_size: int
         The output embedding dimension of the attention module.
+    
+    dropout_probability: float
+        The probability of dropout being applied to the attention probabilities.
 
     Returns
     -------
@@ -233,7 +236,7 @@ class MultiHeadAttention(nn.Module):
         The linear transformation weights for the value vector.
     """
 
-    def __init__(self, num_heads: int, sequence_length: int, hidden_size: int) -> torch.Tensor:
+    def __init__(self, num_heads: int, sequence_length: int, hidden_size: int, dropout_probability: float) -> torch.Tensor:
         super(MultiHeadAttention, self).__init__()
         
         assert hidden_size % num_heads == 0, "embedding dimension must be divisible by the number of attention heads"
@@ -246,7 +249,9 @@ class MultiHeadAttention(nn.Module):
         self.q_w = nn.Linear(hidden_size, hidden_size)
         self.k_w = nn.Linear(hidden_size, hidden_size)
         self.v_w = nn.Linear(hidden_size, hidden_size)
-        self.fc = nn.Linear(hidden_size, hidden_size)
+    
+        self.final_projection = nn.Linear(hidden_size, hidden_size)
+        self.dropout = nn.Dropout(p=dropout_probability)
 
     def forward(self, x):
         batch_size = x.shape[0]
@@ -257,16 +262,16 @@ class MultiHeadAttention(nn.Module):
 
         attention_scores = torch.matmul(q, k.transpose(-1, -2)) / (self.head_dim ** 0.5)
         attention_weights = F.softmax(attention_scores, dim=-1)
+        attention_weights = self.dropout(attention_weights)
         
         attention_embedding = torch.matmul(attention_weights, v)
 
         combined_heads = attention_embedding.transpose(1, 2).reshape(batch_size, self.sequence_length, self.embed_dim)
-
-        final_representation = self.fc(combined_heads)
+        final_representation = self.final_projection(combined_heads)
 
         return final_representation
 
-class TransformerEncoder(nn.Module):
+class TransformerBlock(nn.Module):
     """
     Transformer Encoder
 
@@ -295,9 +300,11 @@ class TransformerEncoder(nn.Module):
         mlp_size: int, dropout_probability: float
         ) -> torch.Tensor:
 
-        super(TransformerEncoder, self).__init__()
+        super(TransformerBlock, self).__init__()
 
-        self.multihead_attention = MultiHeadAttention(num_heads, sequence_length, hidden_size)
+        self.multihead_attention = MultiHeadAttention(
+            num_heads, sequence_length, hidden_size, dropout_probability
+            )
 
         self.layer_norm = nn.LayerNorm(hidden_size)
 

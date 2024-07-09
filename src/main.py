@@ -4,13 +4,11 @@ from tqdm import tqdm
 from typing import Tuple
 from datetime import datetime
 import torch.nn.functional as F
-from torchvision.datasets import CIFAR10
+from torch.utils.data import DataLoader
 from sklearn.metrics import accuracy_score
-from torchvision.transforms import transforms
 from torch.utils.tensorboard import SummaryWriter
-from torch.utils.data import DataLoader, random_split
 from utils import VisionTransformer, get_args, save_args, \
-    get_model, get_checkpoint, set_seed
+    get_model, get_checkpoint, set_seed, get_dataset
 
 def train(
         dataloader: DataLoader, 
@@ -122,18 +120,9 @@ def main():
     if not os.path.isdir(model_dir):
         os.makedirs(model_dir)
 
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-    ])
-
-    dataset = CIFAR10(root=data_dir, train=True, download=True, transform=transform)
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    train_size = int(len(dataset) * 0.8)
-    val_size = int(len(dataset) - train_size)
-
-    train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
+    train_dataset, val_dataset = get_dataset(data_dir)
 
     train_loader = DataLoader(train_dataset, batch_size=args["batch_size"], shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=args["batch_size"], shuffle=False)
@@ -144,9 +133,9 @@ def main():
         num_classes=args["num_classes"], learnable_pe=args["learnable_pe"]
     ).to(device)
 
-    criterion = torch.nn.CrossEntropyLoss()
+    criterion = torch.nn.CrossEntropyLoss(label_smoothing=args["label_smoothing"])
     optimizer = torch.optim.Adam(model.parameters(), lr=args["learning_rate"], weight_decay=args["weight_decay"])
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", patience=args["patience"])
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, args["epochs"])
 
     running_val_loss, running_val_accuracy = [], []
 
@@ -175,8 +164,8 @@ def main():
             print("New minimum loss — model saved.")
 
         if len(running_val_accuracy) > 0 and val_accuracy > max(running_val_accuracy):
-            torch.save(model.state_dict(), os.path.join(model_dir, f"vit-{args['variant']}-{args["patch_size"]}-highest-accuracy.pth"))
-            print("New maximum Accuracy - model saved.")
+            torch.save(model.state_dict(), os.path.join(model_dir, f"vit-{args['variant']}-highest-accuracy.pth"))
+            print("New maximum accuracy — model saved.")
 
         if epoch % 5 == 0:
             checkpoint = get_checkpoint(epoch, model, optimizer, scheduler)
@@ -186,7 +175,7 @@ def main():
         running_val_loss.append(val_loss)
         running_val_accuracy.append(val_accuracy)
 
-        scheduler.step(val_loss)
+        scheduler.step()
 
         print("-------------------------------------------------------------------\n")
 

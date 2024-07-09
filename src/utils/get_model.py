@@ -43,6 +43,12 @@ def get_model(
     num_channels = 3
     sequence_len = ((img_size // patch_size) ** 2) + 1
 
+    if variant == "small":
+        hidden_size = 64
+        num_heads = 4
+        num_layers = 4
+        mlp_size = 256      
+
     if variant == "base":
         hidden_size = 768
         num_heads = 12

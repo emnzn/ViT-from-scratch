@@ -1,12 +1,12 @@
 seed: 42
 epochs: 200
-patience: 10
 img_size: 32
 variant: base
-patch_size: 16
-batch_size: 20
+patch_size: 8
+batch_size: 256
 num_classes: 10
 learnable_pe: True
-weight_decay: 1.0e-3
+weight_decay: 0.0
 learning_rate: 1.0e-4
 dropout_probability: 0.1
+label_smoothing: 0.1
