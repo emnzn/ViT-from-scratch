@@ -3,5 +3,6 @@
 *.pbs
 *.txt
 *.pth
+runs/*
 data/*
 *__pycache__*
