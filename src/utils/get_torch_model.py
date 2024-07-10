@@ -77,5 +77,8 @@ def get_torch_model(
             weights=None, image_size=img_size, dropout=dropout_probability, 
             attention_dropout=dropout_probability, num_classes=num_classes
             )
+        
+    if torch.cuda.device_count() > 1:
+        model = torch.nn.DataParallel(model)
 
     return model
