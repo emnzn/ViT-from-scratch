@@ -30,6 +30,9 @@ def get_model(
         The probability of dropout in the output of each dense layer.
         (Excludes the dense layers within the query, key, and value projections).
 
+    num_classes: int
+        The number of target classes.
+
     learnable_pe: bool
         Whether to initialize a learnable position embedding.
         If false returns static Sinusoidal position embedding from `Attention Is All You Need`. 
@@ -42,13 +45,7 @@ def get_model(
     """
 
     num_channels = 3
-    sequence_len = ((img_size // patch_size) ** 2) + 1
-
-    if variant == "small":
-        hidden_size = 64
-        num_heads = 4
-        num_layers = 4
-        mlp_size = 256      
+    sequence_len = ((img_size // patch_size) ** 2) + 1 
 
     if variant == "base":
         hidden_size = 768

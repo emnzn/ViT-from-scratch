@@ -112,7 +112,7 @@ class Patchifier(nn.Module):
             num_channels, hidden_size, kernel_size=patch_size, stride=patch_size
             )
 
-        self.cls_token = nn.Parameter(torch.randn(1, 1, self.hidden_size))
+        self.cls_token = nn.Parameter(torch.zeros(1, 1, self.hidden_size))
 
     def forward(self, img):
         batch_size = img.shape[0]
@@ -164,7 +164,7 @@ class PositionEncoder(nn.Module):
         self.sequence_len = sequence_len
         self.hidden_size = hidden_size
         self.learnable = learnable
-        self.position_encoding = nn.Parameter(torch.randn(sequence_len, hidden_size)) if learnable else self.sinusoidal_pe()
+        self.position_encoding = nn.Parameter(torch.zeros(sequence_len, hidden_size)) if learnable else self.sinusoidal_pe()
 
         self.dropout = nn.Dropout(p=dropout_probability)
 
@@ -268,6 +268,7 @@ class MultiHeadAttention(nn.Module):
 
         combined_heads = attention_embedding.transpose(1, 2).reshape(batch_size, self.sequence_length, self.embed_dim)
         final_representation = self.final_projection(combined_heads)
+        final_representation = self.dropout(final_representation)
 
         return final_representation
 
@@ -306,7 +307,8 @@ class TransformerBlock(nn.Module):
             num_heads, sequence_length, hidden_size, dropout_probability
             )
 
-        self.layer_norm = nn.LayerNorm(hidden_size)
+        self.layer_norm1 = nn.LayerNorm(hidden_size)
+        self.layer_norm2 = nn.LayerNorm(hidden_size)
 
         self.mlp = MLP(
             nn.Linear(hidden_size, mlp_size),
@@ -317,10 +319,10 @@ class TransformerBlock(nn.Module):
         )
 
     def forward(self, x):
-        normalized_x = self.layer_norm(x)
+        normalized_x = self.layer_norm1(x)
         z = self.multihead_attention(normalized_x) + x
 
-        normalized_z = self.layer_norm(z)
+        normalized_z = self.layer_norm2(z)
         z = self.mlp(normalized_z) + z
 
         return z 
@@ -328,7 +330,7 @@ class TransformerBlock(nn.Module):
 class MLP(nn.Sequential):
     """
     A wrapper for the sequential module. Done for the purpose of better 
-    labelling wihtin the visualization of the model's architecture.
+    labelling within the visualization of the model's architecture.
     """
     
     def __init__(self, *args):
@@ -337,7 +339,7 @@ class MLP(nn.Sequential):
 class Encoder(nn.Sequential):
     """
     A wrapper for the sequential module. Done for the purpose of better 
-    labelling wihtin the visualization of the model's architecture.
+    labelling within the visualization of the model's architecture.
     """
 
     def __init__(self, *args):

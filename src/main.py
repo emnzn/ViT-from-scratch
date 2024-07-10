@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 from sklearn.metrics import accuracy_score
 from torch.utils.tensorboard import SummaryWriter
 from utils import VisionTransformer, get_args, save_args, \
-    get_model, get_checkpoint, set_seed, get_dataset
+    get_model, get_checkpoint, set_seed, get_dataset, get_torch_model
 
 def train(
         dataloader: DataLoader, 
@@ -127,15 +127,23 @@ def main():
     train_loader = DataLoader(train_dataset, batch_size=args["batch_size"], shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=args["batch_size"], shuffle=False)
 
-    model = get_model(
-        args["img_size"], patch_size=args["patch_size"], variant=args["variant"], 
-        dropout_probability=args["dropout_probability"],
-        num_classes=args["num_classes"], learnable_pe=args["learnable_pe"]
-    ).to(device)
+    if args["torch_implementation"]:
+        model = get_torch_model(
+            img_size=args["img_size"], patch_size=args["patch_size"], variant=args["variant"],
+            dropout_probability=args["dropout_probability"], 
+            num_classes=args["num_classes"]
+        ).to(device)
+
+    else:
+        model = get_model(
+            img_size=args["img_size"], patch_size=args["patch_size"], variant=args["variant"], 
+            dropout_probability=args["dropout_probability"],
+            num_classes=args["num_classes"], learnable_pe=args["learnable_pe"]
+        ).to(device)
 
     criterion = torch.nn.CrossEntropyLoss(label_smoothing=args["label_smoothing"])
     optimizer = torch.optim.Adam(model.parameters(), lr=args["learning_rate"], weight_decay=args["weight_decay"])
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, args["epochs"])
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, args["epochs"], eta_min=args["eta_min"])
 
     running_val_loss, running_val_accuracy = [], []
 
