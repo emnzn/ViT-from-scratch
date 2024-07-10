@@ -4,6 +4,7 @@ epochs: 100
 batch_size: 64
 eta_min: 1.0e-6
 learning_rate: 1.0e-4
+apply_augmentation: False
 
 # Regularization
 weight_decay: 0.0

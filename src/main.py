@@ -122,7 +122,7 @@ def main():
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    train_dataset, val_dataset = get_dataset(data_dir)
+    train_dataset, val_dataset = get_dataset(data_dir, args["apply_augmentation"])
 
     train_loader = DataLoader(train_dataset, batch_size=args["batch_size"], shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=args["batch_size"], shuffle=False)
