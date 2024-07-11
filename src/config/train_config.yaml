@@ -17,4 +17,4 @@ variant: base
 patch_size: 16
 num_classes: 10
 learnable_pe: True
-torch_implementation: True
+torch_implementation: False

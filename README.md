@@ -46,6 +46,8 @@ cd src/
 
 Configure model through `train_config.yaml` found under the **config** directory. An example configuration is shown below:
 
+Note: The variant parameter must be one of the following: `base`, `large`, `huge`.
+
 ``` yaml
 # Training
 seed: 42
@@ -66,7 +68,7 @@ variant: base
 patch_size: 16
 num_classes: 10
 learnable_pe: True
-torch_implementation: True
+torch_implementation: False
 ```
 
 ## Training
