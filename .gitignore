@@ -5,4 +5,5 @@
 *.pth
 runs/*
 data/*
+*.ipynb
 *__pycache__*
