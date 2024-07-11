@@ -8,7 +8,7 @@ A PyTorch implementation of the **Vision Transformer**.
 
 ## Objective
 
-To create the Vision Transformer from scratch and validate its performance against the official PyTorch implementation, I trained both the ViT-b/16 model from the PyTorch implementation and my scratch-built version on CIFAR-10 without using any pre-trained weights.
+To create the Vision Transformer from scratch and validate its performance against the official PyTorch implementation, I trained the ViT-b/16 model from both the PyTorch implementation and my scratch-built version on CIFAR-10 without using any pre-trained weights.
 
 The performance of the two models was then evaluated to verify the accuracy of my implementation.
 
