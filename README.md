@@ -12,7 +12,7 @@ To verify my implementation, I trained the ViT-b/16 model from both the official
 
 The performance of the two models was then compared.
 
-Note: The CIFAR-10 test set was used as a validation set solely for the purpose of verifying the implementation's accuracy.
+**Note**: The CIFAR-10 test set was used as a validation set solely for the purpose of verifying the implementation's accuracy.
 
 ## CIFAR-10 Test Results
 
@@ -48,7 +48,7 @@ cd src/
 
 Configure model through `train_config.yaml` found under the **config** directory. An example configuration is shown below:
 
-Note: The variant parameter must be one of the following: `base`, `large`, `huge`.
+**Note**: The variant parameter must be one of the following: `base`, `large`, `huge`.
 
 ``` yaml
 # Training
