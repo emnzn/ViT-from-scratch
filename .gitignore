@@ -3,7 +3,7 @@
 *.pbs
 *.txt
 *.pth
-runs/*
 data/*
 *.ipynb
+*/runs/*
 *__pycache__*
