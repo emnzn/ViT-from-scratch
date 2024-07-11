@@ -71,7 +71,7 @@ torch_implementation: True
 
 ## Training
 
-To train the model run the following under the `src/` directory.
+To train the model, run the following under the `src/` directory.
 
 ```bash
 python main.py
