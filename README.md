@@ -6,11 +6,11 @@ Source: [*An Image is Worth 16x16 Words: Transformers for Image Recognition at S
 
 A PyTorch implementation of the **Vision Transformer**.
 
-## Objective
+## Preliminary
 
-To create the Vision Transformer from scratch and validate its performance against the official PyTorch implementation, I trained the ViT-b/16 model from both the PyTorch implementation and my scratch-built version on CIFAR-10 without using any pre-trained weights.
+To verify my implementation, I trained the ViT-b/16 model from both the official PyTorch implementation and my scratch-built version on CIFAR-10 without using any pre-trained weights.
 
-The performance of the two models was then evaluated to verify the accuracy of my implementation.
+The performance of the two models was then evaluated to verify the consistency of my implementation.
 
 Note: The CIFAR-10 test set was used as a validation set solely for the purpose of verifying the implementation's accuracy.
 
