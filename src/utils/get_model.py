@@ -1,5 +1,5 @@
 import torch
-from .ViT import VisionTransformer
+from .vit import VisionTransformer
 
 def get_model(
         img_size: int,

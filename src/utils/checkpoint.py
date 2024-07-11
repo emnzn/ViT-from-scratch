@@ -1,6 +1,6 @@
 from torch import optim
 from typing import Dict, Any
-from .ViT import VisionTransformer
+from .vit import VisionTransformer
 
 def get_checkpoint(
         epoch: int,

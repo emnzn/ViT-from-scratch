@@ -17,6 +17,7 @@ def train(
         model: VisionTransformer, 
         device: str
         ) -> Tuple[float]:
+    
     """
     Trains the model for a single epoch.
 
@@ -75,7 +76,13 @@ def train(
 
     return epoch_loss, epoch_accuracy
 
-def validate(dataloader, criterion, model, device):
+def validate(
+        dataloader: DataLoader,
+        criterion: torch.nn,
+        model: VisionTransformer, 
+        device: str
+        ) -> Tuple[float]:
+    
     """
     Validates the model for a given epoch.
     """
@@ -187,7 +194,7 @@ def main():
 
         print("-------------------------------------------------------------------\n")
 
-    torch.save(model.state_dict(), os.path.join(model_dir, f"vit-{args['variant']}-latest-model.pth"))
+    torch.save(checkpoint, os.path.join(model_dir, f"vit-{args['variant']}-latest-checkpoint.pth"))
 
 if __name__ == "__main__":
     main()

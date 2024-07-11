@@ -312,8 +312,8 @@ class TransformerBlock(nn.Module):
 
         self.mlp = MLP(
             nn.Linear(hidden_size, mlp_size),
-            nn.Dropout(p=dropout_probability),
             nn.GELU(),
+            nn.Dropout(p=dropout_probability),
             nn.Linear(mlp_size, hidden_size),
             nn.Dropout(p=dropout_probability)
         )

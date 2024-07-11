@@ -1,4 +1,4 @@
-from .ViT import *
+from .vit import *
 from .seed import *
 from .dataset import *
 from .get_model import *

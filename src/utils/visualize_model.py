@@ -1,7 +1,7 @@
 import os
 from get_model import get_model
 from torchview import draw_graph
-from ViT import VisionTransformer
+from vit import VisionTransformer
 from graphviz.graphs import Digraph
 
 def generate_graph(model: VisionTransformer, variant: str, destination: str) -> Digraph:

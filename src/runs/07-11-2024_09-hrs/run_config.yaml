@@ -1,3 +1,4 @@
+apply_augmentation: true
 batch_size: 64
 dropout_probability: 0.0
 epochs: 100

@@ -1,7 +1,7 @@
 # Training
 seed: 42
 epochs: 100
-batch_size: 64
+batch_size: 256
 eta_min: 1.0e-6
 learning_rate: 1.0e-4
 
@@ -9,7 +9,7 @@ learning_rate: 1.0e-4
 weight_decay: 0.0
 label_smoothing: 0.0
 dropout_probability: 0.0
-apply_augmentation: False
+apply_augmentation: True
 
 # Model
 img_size: 32
@@ -17,4 +17,4 @@ variant: base
 patch_size: 16
 num_classes: 10
 learnable_pe: True
-torch_implementation: False
+torch_implementation: True
