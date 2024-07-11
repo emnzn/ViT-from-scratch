@@ -57,7 +57,7 @@ def get_model(
         hidden_size = 1024
         num_heads = 16
         num_layers = 24
-        mlp_size = 4098
+        mlp_size = 4096
 
     elif variant == "huge":
         hidden_size = 1280
