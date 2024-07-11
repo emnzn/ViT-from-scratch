@@ -10,7 +10,7 @@ A PyTorch implementation of the **Vision Transformer**.
 
 To verify my implementation, I trained the ViT-b/16 model from both the official PyTorch implementation and my scratch-built version on CIFAR-10 without using any pre-trained weights.
 
-The performance of the two models was then evaluated to verify the consistency of my implementation.
+The performance of the two models was then compared.
 
 Note: The CIFAR-10 test set was used as a validation set solely for the purpose of verifying the implementation's accuracy.
 
