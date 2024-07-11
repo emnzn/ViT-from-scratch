@@ -12,7 +12,7 @@ To verify my implementation, I trained the ViT-b/16 model from both the official
 
 The performance of the two models was then compared.
 
-**Note**: The CIFAR-10 test set was used as a validation set solely for the purpose of verifying the implementation's accuracy.
+**Note**: The CIFAR-10 test set was used as a validation set for simplicity in verifying the consistency of my implementation.
 
 ## CIFAR-10 Test Results
 
