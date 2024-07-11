@@ -1,7 +1,6 @@
 .*
 *.sh
 *.pbs
-*.txt
 *.pth
 data/*
 *.ipynb

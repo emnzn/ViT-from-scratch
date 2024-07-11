@@ -34,7 +34,6 @@ This repository contains constructors for:
 ## Installation
 
 ```bash
-# install required dependencies
 pip install -r requirements.txt
 ```
 
