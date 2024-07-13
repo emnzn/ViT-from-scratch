@@ -45,7 +45,7 @@ cd src/
 
 ## Configuration
 
-Configure model through `train_config.yaml` found under the **config** directory. An example configuration is shown below:
+Configure model through `train_config.yaml` found under the `config` directory. An example configuration is shown below:
 
 **Note**: The variant parameter must be one of the following: `base`, `large`, `huge`.
 
