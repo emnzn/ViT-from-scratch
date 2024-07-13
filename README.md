@@ -53,7 +53,7 @@ Configure model through `train_config.yaml` found under the `config` directory. 
 # Training
 seed: 42
 epochs: 100
-batch_size: 256
+batch_size: 64
 eta_min: 1.0e-6
 learning_rate: 1.0e-4
 
