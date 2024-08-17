@@ -3,12 +3,12 @@ from torchvision import models
 from torchvision.models import VisionTransformer
 
 def get_torch_model(
-        img_size: int,
-        patch_size: int,
-        variant: str,
-        dropout_probability: float,
-        num_classes: int
-        ) -> VisionTransformer:
+    img_size: int,
+    patch_size: int,
+    variant: str,
+    dropout_probability: float,
+    num_classes: int
+    ) -> VisionTransformer:
     
     """
     Initializes a Vision Transformer from PyTorch to serve as a baseline for validating current implementation.

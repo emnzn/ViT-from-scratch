@@ -11,12 +11,12 @@ from utils import VisionTransformer, get_args, save_args, \
     get_model, get_checkpoint, set_seed, get_dataset, get_torch_model
 
 def train(
-        dataloader: DataLoader, 
-        criterion: torch.nn, 
-        optimizer: torch.optim, 
-        model: VisionTransformer, 
-        device: str
-        ) -> Tuple[float]:
+    dataloader: DataLoader, 
+    criterion: torch.nn, 
+    optimizer: torch.optim, 
+    model: VisionTransformer, 
+    device: str
+    ) -> Tuple[float]:
     
     """
     Trains the model for a single epoch.
@@ -76,12 +76,13 @@ def train(
 
     return epoch_loss, epoch_accuracy
 
+@torch.no_grad()
 def validate(
-        dataloader: DataLoader,
-        criterion: torch.nn,
-        model: VisionTransformer, 
-        device: str
-        ) -> Tuple[float]:
+    dataloader: DataLoader,
+    criterion: torch.nn,
+    model: VisionTransformer, 
+    device: str
+    ) -> Tuple[float]:
     
     """
     Validates the model for a given epoch.

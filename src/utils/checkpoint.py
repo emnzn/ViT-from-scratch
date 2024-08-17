@@ -3,11 +3,11 @@ from typing import Dict, Any
 from .vit import VisionTransformer
 
 def get_checkpoint(
-        epoch: int,
-        model: VisionTransformer, 
-        optimizer: optim, 
-        scheduler: optim.lr_scheduler
-        ) -> Dict[str, Any]:
+    epoch: int,
+    model: VisionTransformer, 
+    optimizer: optim, 
+    scheduler: optim.lr_scheduler
+    ) -> Dict[str, Any]:
     
     """
     Creates a checkpoint to be saved.

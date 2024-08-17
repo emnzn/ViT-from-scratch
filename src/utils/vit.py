@@ -153,9 +153,9 @@ class PositionEncoder(nn.Module):
     """
 
     def __init__(
-            self, sequence_len: int, hidden_size: int, 
-            dropout_probability: float, learnable: bool
-            ) -> torch.Tensor:
+        self, sequence_len: int, hidden_size: int, 
+        dropout_probability: float, learnable: bool
+        ) -> torch.Tensor:
         
         super(PositionEncoder, self).__init__()
 

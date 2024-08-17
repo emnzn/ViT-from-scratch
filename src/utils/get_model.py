@@ -2,13 +2,13 @@ import torch
 from .vit import VisionTransformer
 
 def get_model(
-        img_size: int,
-        patch_size: int, 
-        variant: str, 
-        dropout_probability: float,
-        num_classes: int,
-        learnable_pe: bool
-        ) -> VisionTransformer:
+    img_size: int,
+    patch_size: int, 
+    variant: str, 
+    dropout_probability: float,
+    num_classes: int,
+    learnable_pe: bool
+    ) -> VisionTransformer:
     
     """
     Initializes a ViT of the desired variant.
